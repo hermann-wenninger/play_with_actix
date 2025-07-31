@@ -1,10 +1,11 @@
-use actix_web::{web, App, HttpRequest, HttpServer, HttpResponse, Responder};
+use actix_web::{web,  HttpRequest, HttpResponse, Responder};
+use crate::{AppState, Player};
 /// Spieler aktualisieren (Name oder Score)
 /// # Arguments
 /// * (HttpRequest): die Anfrage, um den Spielernamen zu extrahieren
 pub async fn update_player(req: HttpRequest,data: web::Data<AppState>,body: web::Json<Player>,) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("");
-    let mut players = data.players.lock().unwrap();
+    let  players = data.players.lock().unwrap();
 
     if let Some(player_arc) = players.get(name) {
         let mut player = player_arc.lock().unwrap();
@@ -24,7 +25,7 @@ struct ScoreUpdate {
 
 pub async fn increase_score(req: HttpRequest,data: web::Data<AppState>,body: web::Json<ScoreUpdate>,) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("");
-    let mut players = data.players.lock().unwrap();
+    let  players = data.players.lock().unwrap();
 
     if let Some(player_arc) = players.get(name) {
         let mut player = player_arc.lock().unwrap();
