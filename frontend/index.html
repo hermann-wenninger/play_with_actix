@@ -20,6 +20,9 @@
 
   <pre id="output"></pre>
 
+  <h2>Alle Spieler anzeigen</h2>
+  <ul id="player-list"></ul>
+
   <script>
     const apiBase = "http://127.0.0.1:8080";
 
@@ -52,6 +55,30 @@
         document.getElementById("output").textContent = `Fehler: ${text}`;
       }
     });
+    
+
+        async function fetchPlayers() {
+            try {
+                const responsex = await fetch("http://127.0.0.1:8080/players");
+                if (!responsex.ok) throw new Error("Fehler beim Laden der Spieler");
+
+                const players = await responsex.json();
+
+                const list = document.getElementById("player-list");
+                list.innerHTML = ""; // vorherige Einträge löschen
+
+                players.forEach(player => {
+                    const li = document.createElement("li");
+                    li.textContent = `Name: ${player.name}, Punkte: ${player.score}`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error("Fehler:", err);
+            }
+        }
+
+        // Lade beim Start der Seite die Spielerliste
+        fetchPlayers();
   </script>
 </body>
 </html>
