@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Player Manager</title>
+</head>
+<body>
+  <h1>Player Manager</h1>
+
+  <h2>Spieler hinzufügen</h2>
+  <form id="add-form">
+    <label>Name: <input type="text" id="name" required /></label><br />
+    <label>Score: <input type="number" id="score" required /></label><br />
+    <button type="submit">Hinzufügen</button>
+  </form>
+
+  <h2>Spieler anzeigen</h2>
+  <input type="text" id="search-name" placeholder="Name eingeben" />
+  <button id="search-button">Suchen</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    const apiBase = "http://127.0.0.1:8080";
+
+    // Spieler hinzufügen
+    document.getElementById("add-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const score = parseInt(document.getElementById("score").value);
+
+      const response = await fetch(`${apiBase}/player`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, score }),
+      });
+
+      const text = await response.text();
+      document.getElementById("output").textContent = text;
+    });
+
+    // Spieler abfragen
+    document.getElementById("search-button").addEventListener("click", async () => {
+      const name = document.getElementById("search-name").value;
+      const response = await fetch(`${apiBase}/player/${encodeURIComponent(name)}`);
+
+      if (response.ok) {
+        const player = await response.json();
+        document.getElementById("output").textContent = JSON.stringify(player, null, 2);
+      } else {
+        const text = await response.text();
+        document.getElementById("output").textContent = `Fehler: ${text}`;
+      }
+    });
+  </script>
+</body>
+</html>

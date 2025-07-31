@@ -1,0 +1,8 @@
+curl -X PUT http://localhost:8080/player/Alice \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Alice", "score": 99}'
+
+curl -X PATCH http://localhost:8080/player/Alice/score \
+     -H "Content-Type: application/json" \
+     -d '{"delta": 10}'
+

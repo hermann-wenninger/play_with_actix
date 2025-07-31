@@ -1,0 +1,47 @@
+use actix_web::{web, App, HttpRequest, HttpServer, HttpResponse, Responder};
+/// Spieler aktualisieren (Name oder Score)
+/// # Arguments
+/// * (HttpRequest): die Anfrage, um den Spielernamen zu extrahieren
+pub async fn update_player(req: HttpRequest,data: web::Data<AppState>,body: web::Json<Player>,) -> impl Responder {
+    let name = req.match_info().get("name").unwrap_or("");
+    let mut players = data.players.lock().unwrap();
+
+    if let Some(player_arc) = players.get(name) {
+        let mut player = player_arc.lock().unwrap();
+        player.name = body.name.clone();
+        player.score = body.score;
+        HttpResponse::Ok().body("Player updated")
+    } else {
+        HttpResponse::NotFound().body("Player not found")
+    }
+}
+
+/// Punktzahl darstellen
+#[derive(Debug, serde::Deserialize)]
+struct ScoreUpdate {
+    delta: i32,
+}
+
+pub async fn increase_score(req: HttpRequest,data: web::Data<AppState>,body: web::Json<ScoreUpdate>,) -> impl Responder {
+    let name = req.match_info().get("name").unwrap_or("");
+    let mut players = data.players.lock().unwrap();
+
+    if let Some(player_arc) = players.get(name) {
+        let mut player = player_arc.lock().unwrap();
+        let new_score = player.score as i32 + body.delta;
+        player.score = new_score.max(0) as u32;
+        HttpResponse::Ok().body("Score updated")
+    } else {
+        HttpResponse::NotFound().body("Player not found")
+    }
+}
+
+/// list all Players its a vector of Player structs
+pub async fn list_players(data: web::Data<AppState>) -> impl Responder {
+    let players = data.players.lock().unwrap();
+    let all_players: Vec<Player> = players
+        .values()
+        .map(|p| p.lock().unwrap().clone())
+        .collect();
+    HttpResponse::Ok().json(all_players)
+}
