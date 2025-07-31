@@ -20,7 +20,7 @@ pub async fn update_player(req: HttpRequest,data: web::Data<AppState>,body: web:
 
 /// Punktzahl darstellen
 #[derive(Debug, serde::Deserialize)]
-struct ScoreUpdate {
+pub struct ScoreUpdate {
     delta: i32,
 }
 
