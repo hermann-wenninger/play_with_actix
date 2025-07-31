@@ -21,24 +21,9 @@ struct AppState {
     players: PlayerMap,
 }
 
-async fn get_player(req: HttpRequest, data: web::Data<AppState>) -> impl Responder {
-    let name = req.match_info().get("name").unwrap_or("unknown");
 
-    let players = data.players.lock().unwrap();
-    if let Some(player_arc) = players.get(name) {
-        let player = player_arc.lock().unwrap();
-        HttpResponse::Ok().json(&*player)
-    } else {
-        HttpResponse::NotFound().body("Player not found")
-    }
-}
 
-async fn add_player(data: web::Data<AppState>, body: web::Json<Player>) -> impl Responder {
-    let mut players = data.players.lock().unwrap();
-    let player = Arc::new(Mutex::new(body.into_inner()));
-    players.insert(player.lock().unwrap().name.clone(), player.clone());
-    HttpResponse::Ok().body("Player added")
-}
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -54,8 +39,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(state.clone()))
              .wrap(cors) 
-            .route("/player/{name}", web::get().to(get_player))
-            .route("/player", web::post().to(add_player))
+            .route("/player/{name}", web::get().to(handler::get_player))
+            .route("/player", web::post().to(handler::add_player))
             .route("/player/{name}", web::put().to(handler::update_player))
             .route("/player/{name}/score", web::patch().to(handler::increase_score))
             .route("/players", web::get().to(handler::list_players))

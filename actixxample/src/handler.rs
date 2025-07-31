@@ -1,5 +1,6 @@
 use actix_web::{web,  HttpRequest, HttpResponse, Responder};
 use crate::{AppState, Player};
+use std::sync::{Arc, Mutex};
 /// Spieler aktualisieren (Name oder Score)
 /// # Arguments
 /// * (HttpRequest): die Anfrage, um den Spielernamen zu extrahieren
@@ -45,4 +46,23 @@ pub async fn list_players(data: web::Data<AppState>) -> impl Responder {
         .map(|p| p.lock().unwrap().clone())
         .collect();
     HttpResponse::Ok().json(all_players)
+}
+
+pub async fn add_player(data: web::Data<AppState>, body: web::Json<Player>) -> impl Responder {
+    let mut players = data.players.lock().unwrap();
+    let player = Arc::new(Mutex::new(body.into_inner()));
+    players.insert(player.lock().unwrap().name.clone(), player.clone());
+    HttpResponse::Ok().body("Player added")
+}
+
+pub async fn get_player(req: HttpRequest, data: web::Data<AppState>) -> impl Responder {
+    let name = req.match_info().get("name").unwrap_or("unknown");
+
+    let players = data.players.lock().unwrap();
+    if let Some(player_arc) = players.get(name) {
+        let player = player_arc.lock().unwrap();
+        HttpResponse::Ok().json(&*player)
+    } else {
+        HttpResponse::NotFound().body("Player not found")
+    }
 }
