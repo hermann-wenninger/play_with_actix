@@ -1,0 +1,10 @@
+[package]
+name = "work_stealing_tokio"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.0.0", features = ["full"] }
+[[bin]]
+name = "work_stealing_tokio"
+path = "main.rs"

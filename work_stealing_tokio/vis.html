@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tokio Thread Gantt</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    canvas { max-height: 600px; }
+  </style>
+</head>
+<body>
+  <h1>Tokio Thread-Aktivität</h1>
+  <input type="file" id="csvFile" />
+  <canvas id="chart"></canvas>
+
+  <script>
+    document.getElementById("csvFile").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const lines = event.target.result.split("\n").slice(1);
+        const data = {};
+
+        for (let line of lines) {
+          if (!line.trim()) continue;
+          const [task, thread, start, duration] = line.split(",");
+          if (!data[thread]) data[thread] = [];
+          data[thread].push({
+            x: +start / 1000,
+            y: thread,
+            width: +duration,
+            label: `Task ${task}`
+          });
+        }
+
+        const datasets = Object.entries(data).map(([thread, tasks], idx) => ({
+          label: thread,
+          data: tasks,
+          backgroundColor: `hsl(${idx * 40}, 70%, 60%)`,
+          borderColor: 'black',
+          borderWidth: 1,
+          parsing: {
+            xAxisKey: 'x',
+            yAxisKey: 'y'
+          },
+          barThickness: 8
+        }));
+
+        new Chart(document.getElementById("chart"), {
+          type: 'bar',
+          data: { datasets },
+          options: {
+            indexAxis: 'y',
+            plugins: {
+              tooltip: { callbacks: { label: ctx => `${ctx.raw.label} (${ctx.raw.width} ms)` } }
+            },
+            scales: {
+              x: { title: { display: true, text: 'Startzeit (ms)' } },
+              y: { title: { display: true, text: 'Threads' }, stacked: true }
+            }
+          }
+        });
+      };
+
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
