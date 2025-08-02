@@ -25,6 +25,8 @@ pub async fn update_player(req: HttpRequest,data: web::Data<AppState>,body: web:
 pub struct ScoreUpdate {
     delta: i32,
 }
+
+
 ///Punktezahl erhöhen
 pub async fn increase_score(req: HttpRequest,data: web::Data<AppState>,body: web::Json<ScoreUpdate>,) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("");
@@ -49,6 +51,8 @@ pub async fn list_players(data: web::Data<AppState>) -> impl Responder {
         .collect();
     HttpResponse::Ok().json(all_players)
 }
+
+
 /// Registrieren neuen Player
 pub async fn add_player(data: web::Data<AppState>, body: web::Json<Player>) -> impl Responder {
     let mut players = data.players.lock().unwrap();
@@ -56,6 +60,8 @@ pub async fn add_player(data: web::Data<AppState>, body: web::Json<Player>) -> i
     players.insert(player.lock().unwrap().name.clone(), player.clone());
     HttpResponse::Ok().body("Player added")
 }
+
+
 /// Zeige alle Spieler an(Player)
 pub async fn get_player(req: HttpRequest, data: web::Data<AppState>) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("unknown");
