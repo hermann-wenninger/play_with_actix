@@ -1,6 +1,8 @@
 use actix_web::{web,  HttpRequest, HttpResponse, Responder};
 use crate::{AppState, Player};
 use std::sync::{Arc, Mutex};
+
+
 /// Spieler aktualisieren (Name oder Score)
 /// # Arguments
 /// * (HttpRequest): die Anfrage, um den Spielernamen zu extrahieren
@@ -23,7 +25,7 @@ pub async fn update_player(req: HttpRequest,data: web::Data<AppState>,body: web:
 pub struct ScoreUpdate {
     delta: i32,
 }
-
+///Punktezahl erhöhen
 pub async fn increase_score(req: HttpRequest,data: web::Data<AppState>,body: web::Json<ScoreUpdate>,) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("");
     let  players = data.players.lock().unwrap();
@@ -38,7 +40,7 @@ pub async fn increase_score(req: HttpRequest,data: web::Data<AppState>,body: web
     }
 }
 
-/// list all Players its a vector of Player structs
+/// liste aller Player
 pub async fn list_players(data: web::Data<AppState>) -> impl Responder {
     let players = data.players.lock().unwrap();
     let all_players: Vec<Player> = players
@@ -47,14 +49,14 @@ pub async fn list_players(data: web::Data<AppState>) -> impl Responder {
         .collect();
     HttpResponse::Ok().json(all_players)
 }
-
+/// Registrieren neuen Player
 pub async fn add_player(data: web::Data<AppState>, body: web::Json<Player>) -> impl Responder {
     let mut players = data.players.lock().unwrap();
     let player = Arc::new(Mutex::new(body.into_inner()));
     players.insert(player.lock().unwrap().name.clone(), player.clone());
     HttpResponse::Ok().body("Player added")
 }
-
+/// Zeige alle Spieler an(Player)
 pub async fn get_player(req: HttpRequest, data: web::Data<AppState>) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("unknown");
 
