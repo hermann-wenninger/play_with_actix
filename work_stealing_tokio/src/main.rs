@@ -7,7 +7,7 @@ use tokio::time::Duration;
 /// Simuliere CPU-Arbeit – finde die ersten `n` Primzahlen
 fn compute_primes(n: usize) -> Vec<usize> {
     let mut primes = vec![];
-    let mut candidate = 2;
+    let mut candidate = 10000;
 
     while primes.len() < n {
         if (2..=candidate / 2).all(|i| candidate % i != 0) {
@@ -24,7 +24,7 @@ async fn main() {
     let log_data: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
     let mut handles = vec![];
 
-    for i in 0..50 {
+    for i in 0..1000 {
         let log_data = log_data.clone();
 
         let handle = task::spawn(async move {
