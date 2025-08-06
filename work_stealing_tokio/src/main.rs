@@ -24,7 +24,7 @@ async fn main() {
     let log_data: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
     let mut handles = vec![];
 
-    for i in 0..20 {
+    for i in 0..50 {
         let log_data = log_data.clone();
 
         let handle = task::spawn(async move {
